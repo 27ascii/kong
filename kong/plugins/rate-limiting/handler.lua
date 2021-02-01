@@ -124,14 +124,22 @@ function RateLimitingHandler:access(conf)
   local fault_tolerant = conf.fault_tolerant
 
   -- Load current metric for configured period
-  local limits = {
-    second = conf.second,
-    minute = conf.minute,
-    hour = conf.hour,
-    day = conf.day,
-    month = conf.month,
-    year = conf.year,
-  }
+  local limits
+  if kong.ctx.shared.rate_limits then
+    -- Load settings from context
+    limits = kong.ctx.shared.rate_limits
+  else
+    -- Load current metric for configured period
+    limits = {
+      second = conf.second,
+      minute = conf.minute,
+      hour = conf.hour,
+      day = conf.day,
+      month = conf.month,
+      year = conf.year,
+    }
+  end
+  
 
   local usage, stop, err = get_usage(conf, identifier, current_timestamp, limits)
   if err then
